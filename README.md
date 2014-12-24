@@ -13,9 +13,11 @@ $ npm install --save cache-memoize
 ## Usage
 
 ```js
-var cache-memoize = require('cache-memoize');
+var memoize = require('cache-memoize');
 
-cache-memoize('Rainbow');
+var memoizedRandom = memoize(function() { return Math.floor(Math.random()*100);}, 2);
+memoizedRandom();
+
 ```
 
 
