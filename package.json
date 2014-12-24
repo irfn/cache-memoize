@@ -1,6 +1,6 @@
 {
   "name": "cache-memoize",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Memoize function results into node-cache",
   "author": {
     "name": "Irfan Shah",
