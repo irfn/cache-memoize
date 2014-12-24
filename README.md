@@ -2,7 +2,7 @@
 
 > Memoize function results into node-cache
 
-
+simple cache memoize with node-cache backend
 ## Install
 
 ```sh
