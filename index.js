@@ -1,6 +1,7 @@
 'use strict';
 var uuid = require('node-uuid');
 var underscore = require('underscore');
+var Promise = require('bluebird');
 
 var memoize = function(fun, ttl) {
     if(ttl === undefined) {
@@ -14,16 +15,36 @@ var memoize = function(fun, ttl) {
     }
     var memoizeNamespace = uuid.v4();
 
+
     return function() {
         var functionArgs = underscore.values(arguments);
         var memoizeKey =  memoizeNamespace + functionArgs.join();
         var memoizeValue = global.memoizeCache.get(memoizeKey);
         if(underscore.isEmpty(memoizeValue)) {
             var v = fun.apply(null, functionArgs);
-            global.memoizeCache.set(memoizeKey, {value: v});
-            return v;
+            var returnValue;
+            if(typeof(v._promiseAt)  === 'function') {
+                returnValue = new Promise(function(resolve, reject){
+                    v.then(function(value){
+                        global.memoizeCache.set(memoizeKey, {value: value, type: 'promise'});
+                        resolve(value)
+                    }).catch(function(error){
+                        reject(error);
+                    });
+                });
+            } else {
+                global.memoizeCache.set(memoizeKey, {value: v, type: 'value'});
+                returnValue = v;
+            }
+            return returnValue;
         } else {
-            return memoizeValue[memoizeKey].value;
+            if(memoizeValue[memoizeKey].type === 'promise') {
+                return new Promise(function(resolve, reject){
+                    resolve(memoizeValue[memoizeKey].value)
+                });
+            } else {
+                return memoizeValue[memoizeKey].value;
+            }
         }
     };
 };
